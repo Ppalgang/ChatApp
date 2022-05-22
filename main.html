@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="tr">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<title>Chat</title>
+    <style>
+      body { font-family: 'Roboto', sans-serif; font-size: 20px; background: lightgray; margin: 30px; }
+      .btn { cursor: pointer; padding: 15px 15px; background: var(--light-color); color:black; border: 0; font-size: 20px; }
+      h1 {color:dodgerblue; margin: 5px;}
+      #container { background-color: gray; text-align: center; margin: auto; width: fit-content; padding: 30px;}
+      #username { border: 1px; padding: 0 1rem; flex-grow: 1; border-radius: 1rem; margin: 0.25rem; }
+      .form-control { margin: 5px;}
+    </style>
+	</head>
+	<body>
+		<div id="container">
+			<h1><b>ChatCord</b></h1>
+			<form action="chat.html">
+				<div class="form-control">
+					<label for="username">Kullanıcı Adı</label>
+					<input type="text" name="username" id="username" placeholder="Kullanıcı adı giriniz..." required />
+				</div>
+				<div class="form-control">
+					<label for="room">Odalar</label>
+					<select name="room" id="room">
+						<option value="Sohbet">Sohbet</option>
+						<option value="Oyun">Oyun</option>
+						<option value="Kodlama">Kodlama</option>
+						<option value="Sohbet_2">Sohbet 2</option>
+						<option value="Oyun_2">Oyun 2</option>
+						<option value="Kodlama_2">Kodlama 2</option>
+					</select>
+				</div>
+				<button type="submit" class="btn"><b>Sohbete Katıl</b></button>
+			</form>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+    <head>
+        <meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Chat</title>
+        <style>
+          body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    
+          #form { background: rgba(0, 116, 211, 0.568); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+          #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+          #input:focus { outline: none; }
+          #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+    
+          #mess { position: fixed; left: 200px; width: 552px; height: 493px;}
+          #messages { list-style-type: none; margin: 0; padding: 0; display: inline-block; word-break: break-word; }
+          #messages > li { padding: 0.5rem 1rem; background: #bdbdbd; width: 552px;}
+          #messages > li:nth-child(odd) { background: #e2e2e2; }
+          #time { color:gray; float: right; font-size: small;}
+          #topSide { background: rgba(0, 116, 211, 0.568); position: fixed; width: 200px; height: 493px; }
+          #leave { background: #333; position: fixed;  float: left;  margin-top: 0px; margin-left: 5px; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff;}
+          #room { text-align: center; }
+          #roomName {text-align: center; font-size: large; }
+        </style>
+    </head>
+<body>
+    <div id="topSide">
+      <button id="leave" onclick="window.location.href = 'http://localhost:3000';">Ayrıl</button>
+      <p id="roomName">Oda ismi</p>
+      <ul id="users">
+      </ul>
+    </div>
+    <div id="mess">
+      <ul id="messages">
+    </ul>
+      <p id="feedback"></p>
+    </div>
+    <form id="form" action="">
+        <input id="input" placeholder="Mesajınızı Giriniz.." /><button>Gönder</button>
+    </form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.0/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.10.3/qs.min.js"></script>
+<script>
+  //kullanıcı adı ve odayı önceki htmlden alma
+  const { username, room } = Qs.parse(location.search, {
+    ignoreQueryPrefix:true
+  });
+  console.log(username, room);
+
+    var socket = io('http://localhost:3000');
+
+    //odaya katılma ve kullanıcı adını alma
+    socket.emit('joinRoom', { username, room })
+
+    // oda ve kullanıcıları çekme
+    socket.on('roomUsers', ({ room, users }) => {
+      outputRoomName(room);
+      outputUsers(users);
+    })
+
+    var messages = document.getElementById('messages');
+    var form = document.getElementById('form');
+    var input = document.getElementById('input');
+    var feedback = document.getElementById('feedback');
+
+    var roomName = document.getElementById('roomName');
+    var userList = document.getElementById('users');
+
+//burası socket yollar
+     form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value) {
+          var tarih = new Date();
+          socket.emit('chat message', ': </strong>' + input.value + '<span id="time">' + tarih.getHours() + ':' + tarih.getMinutes() + '</span>');
+         var item = document.createElement('li');
+          item.innerHTML = '<strong style="color: green;">' + username + ': </strong>' + input.value + '<span id="time">' + tarih.getHours() + ':' + tarih.getMinutes() + '</span>';
+          messages.appendChild(item); 
+         input.value = '';
+        }
+    });
+    //burasıda serverden gelen socketi htmle yazar
+    socket.on('chat message', function(msg) {
+        feedback.innerHTML = '';
+    var item = document.createElement('li');
+    item.innerHTML = msg;//textContent eski hali hatalı
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+// buranın altı yazıyor... olması için
+  input.addEventListener('keypress', () => {
+      socket.emit('typing', ' ')
+  })
+  socket.on('typing', data => {
+    feedback.innerHTML = '<p>' + data + ' yazıyor...</p>'
+    if(input.value == ''){
+        feedback.innerHTML = '';
+    }
+  })//yazıyor kısmında biri yazmayı kessede devam ediyor karşı taraf yazana kadar eğer yazarsa tekrar güncelleniyor kısaca yazma durursa bir socket daha atılıp sayfa güncellenmeli
+  input.addEventListener('keyup', () => {
+    feedback.innerHTML = '';
+  })
+
+  // oda ismini DOM'a ekleme
+  function outputRoomName(room) {
+    roomName.innerText = room;
+  }
+
+  // kullanıcıları DOM'a ekle
+  function outputUsers(users) {
+    userList.innerHTML = `
+    ${users.map(user => `<li>${user.username}</li>`).join('')}
+    `;
+  }
+
+</script>
+
+</body>
+</html>
